@@ -4,43 +4,60 @@
    ========================================================= */
 
 :root {
-  --bg: #f4f6fb;
+  /* Cool "exam paper" neutrals — a paper-grey ground, ink-navy text,
+     rather than a stock white/mid-grey pairing. */
+  --bg: #f2f3f7;
   --bg-elevated: #ffffff;
-  --bg-muted: #eef1f8;
-  --text: #1b2334;
-  --text-muted: #6b7280;
-  --border: #e2e6f0;
-  --accent: #4f8cff;
-  --accent-hover: #3d73e0;
-  --success: #2fb380;
-  --danger: #e6584c;
-  --warning: #f0a63d;
+  --bg-muted: #e8eaf1;
+  --text: #1e2436;
+  --text-muted: #656f85;
+  --border: #dde1ea;
+
+  /* Fountain-pen ink blue as the brand accent — deliberately deeper and
+     more desaturated than a stock SaaS blue, so it reads "considered"
+     rather than "default". Semantic colours are a separate family:
+     red-pen correction, teal tick, goldenrod highlighter. */
+  --accent: #2c4a7c;
+  --accent-hover: #223a63;
+  --success: #2f8f6b;
+  --danger: #c0392b;
+  --warning: #b8860b;
   --shadow: 0 1px 3px rgba(20, 25, 40, 0.08), 0 1px 2px rgba(20,25,40,0.06);
   --radius: 10px;
   --nav-width: 220px;
+
+  /* Two roles: a serif for headings (exam-paper / prospectus feel),
+     a neutral system sans for dense UI, and tabular numerals for the
+     timer and stat figures so digits line up like a stopwatch. */
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
 [data-theme="dark"] {
-  --bg: #12141c;
-  --bg-elevated: #1b1f2b;
-  --bg-muted: #232838;
-  --text: #eceef4;
-  --text-muted: #9aa1b4;
-  --border: #2c3142;
-  --accent: #6fa2ff;
-  --accent-hover: #85b0ff;
+  --bg: #12161f;
+  --bg-elevated: #1b2130;
+  --bg-muted: #232a3b;
+  --text: #e7e9ef;
+  --text-muted: #9aa3b8;
+  --border: #2b3244;
+  --accent: #6e93d6;
+  --accent-hover: #86a6e0;
+  --success: #45b08b;
+  --danger: #e2685b;
+  --warning: #d2a23d;
   --shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 
 * { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   transition: background 0.25s ease, color 0.25s ease;
 }
-h1, h2, h3 { margin: 0 0 0.5em 0; }
+h1, h2, h3 { margin: 0 0 0.5em 0; font-family: var(--font-display); font-weight: 700; text-wrap: balance; letter-spacing: 0.1px; }
 p { line-height: 1.5; }
 button, input, select, textarea { font-family: inherit; font-size: 0.95rem; color: inherit; }
 .hidden { display: none !important; }
@@ -60,7 +77,7 @@ kbd {
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 50;
 }
-.app-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; }
+.app-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.15rem; font-family: var(--font-display); letter-spacing: 0.2px; }
 .app-logo { font-size: 1.3rem; }
 .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 .nav-toggle { display: none; }
@@ -136,7 +153,7 @@ kbd {
   background: var(--bg-elevated); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow);
 }
-.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .stat-card .stat-label { color: var(--text-muted); font-size: 0.82rem; margin-top: 2px; }
 
 /* ---------- Filters ---------- */
@@ -186,7 +203,7 @@ kbd {
 .bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
 .bar-fill.secondary { opacity: 0.55; }
 .bar-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bar-value { text-align: right; color: var(--text-muted); }
+.bar-value { text-align: right; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .bar-empty { color: var(--text-muted); font-size: 0.85rem; padding: 10px 0; }
 .dual-bar { display: flex; flex-direction: column; gap: 2px; }
 
@@ -258,14 +275,14 @@ kbd {
 .timer-session-select { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .timer-session-select select, .timer-session-select input { padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); }
 .timer-display-wrap { margin: 16px 0; }
-.timer-display { font-size: 3.4rem; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+.timer-display { font-size: 3.6rem; font-weight: 600; font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 2px; }
 .timer-sub-label { color: var(--text-muted); margin-top: 4px; }
 .pomodoro-phase { font-weight: 600; color: var(--accent); margin-bottom: 4px; }
 .timer-controls { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
 
 /* ---------- Tables ---------- */
 .table-wrap { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
 .data-table th, .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
 .data-table th { color: var(--text-muted); font-weight: 600; background: var(--bg-muted); position: sticky; top: 0; }
 .data-table td.notes-cell { white-space: normal; max-width: 220px; }
