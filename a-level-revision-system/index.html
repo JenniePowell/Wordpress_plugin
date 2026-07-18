@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A-Level Revision System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== TOP HEADER ===================== -->
+<header class="app-header">
+  <button id="navToggleBtn" class="icon-btn nav-toggle" title="Menu" aria-label="Toggle navigation">&#9776;</button>
+  <div class="app-title">
+    <span class="app-logo">&#128218;</span>
+    <span>A-Level Revision</span>
+  </div>
+  <div class="header-actions">
+    <button id="quickTimerBtn" class="btn btn-accent" title="Jump to Timer (Shortcut: T)">&#9201; Timer</button>
+    <button id="darkModeBtn" class="icon-btn" title="Toggle dark mode (Shortcut: M)">&#127769;</button>
+  </div>
+</header>
+
+<div class="app-shell">
+
+  <!-- ===================== SIDE NAVIGATION ===================== -->
+  <nav id="mainNav" class="main-nav">
+    <button class="nav-item active" data-tab="dashboard"><span>&#128202;</span> Dashboard</button>
+    <button class="nav-item" data-tab="timetable"><span>&#128197;</span> Timetable</button>
+    <button class="nav-item" data-tab="timer"><span>&#9201;</span> Timer</button>
+    <button class="nav-item" data-tab="log"><span>&#128221;</span> Study Log</button>
+    <button class="nav-item" data-tab="subjects"><span>&#127891;</span> Subjects</button>
+    <button class="nav-item" data-tab="stats"><span>&#128200;</span> Statistics</button>
+    <button class="nav-item" data-tab="data"><span>&#128190;</span> Data &amp; Settings</button>
+  </nav>
+  <div id="navOverlay" class="nav-overlay"></div>
+
+  <!-- ===================== MAIN CONTENT ===================== -->
+  <main class="app-main">
+
+    <!-- ---------- DASHBOARD TAB ---------- -->
+    <section id="tab-dashboard" class="tab-panel active">
+      <div class="panel-header">
+        <h1>Dashboard</h1>
+        <div class="filter-bar">
+          <select id="dashFilterRange">
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all" selected>All Time</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          <input type="date" id="dashFromDate" class="hidden-input">
+          <span id="dashToLabel" class="hidden-input">to</span>
+          <input type="date" id="dashToDate" class="hidden-input">
+        </div>
+      </div>
+
+      <div class="stat-grid" id="dashStatCards"></div>
+
+      <div class="dash-columns">
+        <div class="card">
+          <h2>Subjects</h2>
+          <div id="subjectSummaryCards" class="subject-cards"></div>
+        </div>
+        <div class="card">
+          <h2>Upcoming Sessions</h2>
+          <div id="upcomingSessionsList" class="list"></div>
+        </div>
+      </div>
+
+      <div class="dash-columns">
+        <div class="card">
+          <h2>Upcoming Exams</h2>
+          <div id="upcomingExamsList" class="list"></div>
+          <button id="addExamBtn" class="btn btn-small">+ Add Exam</button>
+        </div>
+        <div class="card">
+          <h2>Balance Check</h2>
+          <div id="balanceCheck" class="list"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Charts</h2>
+        <div class="chart-grid">
+          <div class="chart-box">
+            <h3>Revision Time by Subject</h3>
+            <div id="chartBySubject" class="bar-chart"></div>
+          </div>
+          <div class="chart-box">
+            <h3>Weekly Revision Hours (last 8 weeks)</h3>
+            <div id="chartWeekly" class="bar-chart"></div>
+          </div>
+          <div class="chart-box">
+            <h3>Planned vs Actual (by subject)</h3>
+            <div id="chartPlannedActual" class="bar-chart"></div>
+          </div>
+          <div class="chart-box">
+            <h3>Activity — Last 7 Days</h3>
+            <div id="chartLast7" class="bar-chart"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- TIMETABLE / CALENDAR TAB ---------- -->
+    <section id="tab-timetable" class="tab-panel">
+      <div class="panel-header">
+        <h1>Timetable</h1>
+        <div class="filter-bar">
+          <div class="view-switch">
+            <button class="view-btn active" data-view="week">Week</button>
+            <button class="view-btn" data-view="month">Month</button>
+            <button class="view-btn" data-view="day">Day</button>
+          </div>
+          <button id="printBtn" class="btn btn-small">&#128424; Print</button>
+          <button id="addSessionBtn" class="btn btn-accent">+ Add Session</button>
+        </div>
+      </div>
+
+      <div class="filter-bar filter-bar-secondary">
+        <select id="filterSubject"><option value="">All Subjects</option></select>
+        <select id="filterCompleted">
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="upcoming">Upcoming</option>
+        </select>
+        <select id="filterPriority">
+          <option value="">All Priorities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="filterMethod"><option value="">All Methods</option></select>
+        <input type="text" id="filterSearch" placeholder="Search topic / notes...">
+      </div>
+
+      <div id="weekNav" class="week-nav">
+        <button id="prevPeriod" class="btn btn-small">&larr; Prev</button>
+        <span id="periodLabel" class="period-label"></span>
+        <button id="todayBtn" class="btn btn-small">Today</button>
+        <button id="nextPeriod" class="btn btn-small">Next &rarr;</button>
+      </div>
+
+      <div id="printableTimetable">
+        <div id="weekView" class="week-view"></div>
+        <div id="monthView" class="month-view hidden"></div>
+        <div id="dayView" class="day-view hidden"></div>
+      </div>
+    </section>
+
+    <!-- ---------- TIMER TAB ---------- -->
+    <section id="tab-timer" class="tab-panel">
+      <div class="panel-header"><h1>Revision Timer</h1></div>
+
+      <div class="card timer-card">
+        <div class="timer-mode-switch">
+          <button class="mode-btn active" data-mode="stopwatch">Stopwatch</button>
+          <button class="mode-btn" data-mode="countdown">Countdown</button>
+          <button class="mode-btn" data-mode="pomodoro">Pomodoro</button>
+        </div>
+
+        <div id="countdownSetup" class="timer-setup hidden">
+          <label>Minutes: <input type="number" id="countdownMinutes" value="25" min="1" max="300"></label>
+        </div>
+        <div id="pomodoroSetup" class="timer-setup hidden">
+          <label>Work (min): <input type="number" id="pomodoroWork" value="25" min="1" max="120"></label>
+          <label>Break (min): <input type="number" id="pomodoroBreak" value="5" min="1" max="60"></label>
+        </div>
+
+        <div class="timer-session-select">
+          <select id="timerSubjectSelect"><option value="">Select subject...</option></select>
+          <select id="timerTopicSelect"><option value="">Select topic...</option></select>
+          <input type="text" id="timerCustomTopic" placeholder="Or type a topic name" class="hidden-input">
+        </div>
+
+        <div class="timer-display-wrap">
+          <div id="pomodoroPhaseLabel" class="pomodoro-phase hidden">Focus Time</div>
+          <div id="timerDisplay" class="timer-display">00:00:00</div>
+          <div id="timerSubLabel" class="timer-sub-label">Not started</div>
+        </div>
+
+        <div class="timer-controls">
+          <button id="timerStartBtn" class="btn btn-accent">&#9654; Start</button>
+          <button id="timerPauseBtn" class="btn" disabled>&#9208; Pause</button>
+          <button id="timerResumeBtn" class="btn hidden">&#9654; Resume</button>
+          <button id="timerStopBtn" class="btn btn-danger" disabled>&#9632; Stop</button>
+          <button id="timerFinishBtn" class="btn btn-success" disabled>&#10003; Finish Session</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Today's Planned Sessions</h2>
+        <div id="timerTodaysSessions" class="list"></div>
+      </div>
+    </section>
+
+    <!-- ---------- STUDY LOG TAB ---------- -->
+    <section id="tab-log" class="tab-panel">
+      <div class="panel-header">
+        <h1>Study Log</h1>
+        <button id="addLogBtn" class="btn btn-accent">+ Add Log Entry</button>
+      </div>
+
+      <div class="filter-bar filter-bar-secondary">
+        <select id="logFilterSubject"><option value="">All Subjects</option></select>
+        <select id="logFilterCompleted">
+          <option value="">All Status</option>
+          <option value="completed">Completed</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="upcoming">Upcoming</option>
+        </select>
+        <select id="logFilterPriority">
+          <option value="">All Priorities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select id="logFilterMethod"><option value="">All Methods</option></select>
+        <input type="date" id="logFilterDate">
+        <input type="text" id="logSearch" placeholder="Search...">
+      </div>
+
+      <div class="table-wrap">
+        <table id="logTable" class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th><th>Subject</th><th>Topic</th><th>Planned</th><th>Actual</th>
+              <th>Method</th><th>Confidence</th><th>Focus</th><th>Status</th><th>Notes</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody"></tbody>
+        </table>
+      </div>
+      <div id="logEmptyState" class="empty-state hidden">No study log entries yet. Add a session or log a completed one manually.</div>
+    </section>
+
+    <!-- ---------- SUBJECTS TAB ---------- -->
+    <section id="tab-subjects" class="tab-panel">
+      <div class="panel-header">
+        <h1>Subjects &amp; Topics</h1>
+        <button id="addSubjectBtn" class="btn btn-accent">+ Add Subject</button>
+      </div>
+      <div id="subjectsList" class="subjects-manage-list"></div>
+      <div id="subjectsEmptyState" class="empty-state hidden">No subjects yet. Add your first A-Level subject to get started.</div>
+    </section>
+
+    <!-- ---------- STATISTICS TAB ---------- -->
+    <section id="tab-stats" class="tab-panel">
+      <div class="panel-header"><h1>Statistics &amp; Progress</h1></div>
+      <div class="stat-grid" id="statsGrid"></div>
+      <div class="card">
+        <h2>Per-Subject Breakdown</h2>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Subject</th><th>Total Hrs</th><th>Target Hrs</th><th>% of Target</th><th>Sessions</th><th>Avg Session (min)</th></tr></thead>
+            <tbody id="statsSubjectBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- DATA & SETTINGS TAB ---------- -->
+    <section id="tab-data" class="tab-panel">
+      <div class="panel-header"><h1>Data &amp; Settings</h1></div>
+
+      <div class="card">
+        <h2>Backup &amp; Restore</h2>
+        <p class="muted">All data is saved automatically to your browser's Local Storage. Use these tools to back up or move your data.</p>
+        <div class="btn-row">
+          <button id="exportJsonBtn" class="btn">Export Full Backup (JSON)</button>
+          <button id="exportCsvSessionsBtn" class="btn">Export Sessions (CSV)</button>
+          <button id="exportCsvLogBtn" class="btn">Export Study Log (CSV)</button>
+          <label class="btn" for="importFileInput">Import Backup (JSON)</label>
+          <input type="file" id="importFileInput" accept="application/json" class="hidden-input">
+          <button id="restoreAutoBackupBtn" class="btn">Restore Last Auto-Backup</button>
+          <button id="clearAllDataBtn" class="btn btn-danger">Clear All Data</button>
+        </div>
+        <p id="lastBackupLabel" class="muted small"></p>
+      </div>
+
+      <div class="card">
+        <h2>Preferences</h2>
+        <label class="row-check"><input type="checkbox" id="darkModeCheckbox"> Dark Mode</label>
+        <label>Week starts on:
+          <select id="weekStartSelect">
+            <option value="monday">Monday</option>
+            <option value="sunday">Sunday</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="card">
+        <h2>Keyboard Shortcuts</h2>
+        <ul class="shortcut-list">
+          <li><kbd>D</kbd> Dashboard</li>
+          <li><kbd>W</kbd> Timetable</li>
+          <li><kbd>T</kbd> Timer</li>
+          <li><kbd>L</kbd> Study Log</li>
+          <li><kbd>N</kbd> New Session</li>
+          <li><kbd>M</kbd> Toggle Dark Mode</li>
+          <li><kbd>/</kbd> Focus Search</li>
+          <li><kbd>Esc</kbd> Close Dialog</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- Session Add/Edit Modal -->
+<div id="sessionModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="sessionModalTitle">Add Session</h2>
+      <button class="icon-btn modal-close" data-close="sessionModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sessionId">
+      <div class="form-grid">
+        <label>Subject
+          <select id="sessionSubject" required></select>
+        </label>
+        <label>Topic
+          <select id="sessionTopic"></select>
+        </label>
+        <label>Date
+          <input type="date" id="sessionDate" required>
+        </label>
+        <label>Priority
+          <select id="sessionPriority">
+            <option value="high">High</option>
+            <option value="medium" selected>Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </label>
+        <label>Start Time
+          <input type="time" id="sessionStart" required>
+        </label>
+        <label>Finish Time
+          <input type="time" id="sessionFinish" required>
+        </label>
+        <label>Difficulty
+          <select id="sessionDifficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </label>
+        <label>Revision Method
+          <select id="sessionMethod">
+            <option>Active Recall</option>
+            <option>Flashcards</option>
+            <option>Past Papers</option>
+            <option>Mind Maps</option>
+            <option>Reading / Notes</option>
+            <option>Practice Questions</option>
+            <option>Teaching / Explaining</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Repeat
+          <select id="sessionRecur">
+            <option value="none">Does not repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+          </select>
+        </label>
+        <label id="sessionRecurCountWrap" class="hidden-input">Number of occurrences
+          <input type="number" id="sessionRecurCount" value="4" min="2" max="52">
+        </label>
+      </div>
+      <label class="full-width">Notes
+        <textarea id="sessionNotes" rows="2" placeholder="Anything to remember for this session..."></textarea>
+      </label>
+      <label class="row-check"><input type="checkbox" id="sessionCompleted"> Mark as completed</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-small" id="duplicateSessionBtn">Duplicate</button>
+      <button class="btn btn-danger btn-small" id="deleteSessionBtn">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" data-close="sessionModal">Cancel</button>
+      <button class="btn btn-accent" id="saveSessionBtn">Save Session</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Entry Modal -->
+<div id="logModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="logModalTitle">Add Log Entry</h2>
+      <button class="icon-btn modal-close" data-close="logModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="logId">
+      <div class="form-grid">
+        <label>Subject <select id="logSubject" required></select></label>
+        <label>Topic <select id="logTopic"></select></label>
+        <label>Date <input type="date" id="logDate" required></label>
+        <label>Planned Duration (min) <input type="number" id="logPlanned" min="0" value="30"></label>
+        <label>Actual Duration (min) <input type="number" id="logActual" min="0" value="30"></label>
+        <label>Method
+          <select id="logMethod">
+            <option>Active Recall</option>
+            <option>Flashcards</option>
+            <option>Past Papers</option>
+            <option>Mind Maps</option>
+            <option>Reading / Notes</option>
+            <option>Practice Questions</option>
+            <option>Teaching / Explaining</option>
+            <option>Other</option>
+          </select>
+        </label>
+        <label>Confidence (1-5)
+          <input type="range" id="logConfidence" min="1" max="5" value="3">
+        </label>
+        <label>Focus (1-5)
+          <input type="range" id="logFocus" min="1" max="5" value="3">
+        </label>
+      </div>
+      <label class="full-width">Notes <textarea id="logNotes" rows="2"></textarea></label>
+      <label class="row-check"><input type="checkbox" id="logCompleted" checked> Completed</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-small" id="deleteLogBtn">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" data-close="logModal">Cancel</button>
+      <button class="btn btn-accent" id="saveLogBtn">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Subject Modal -->
+<div id="subjectModal" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="subjectModalTitle">Add Subject</h2>
+      <button class="icon-btn modal-close" data-close="subjectModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="subjectId">
+      <div class="form-grid">
+        <label>Subject Name <input type="text" id="subjectName" placeholder="e.g. Chemistry" required></label>
+        <label>Colour <input type="color" id="subjectColor" value="#4f8cff"></label>
+        <label>Target Hours (total) <input type="number" id="subjectTarget" min="0" value="50"></label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-small" id="deleteSubjectBtn">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" data-close="subjectModal">Cancel</button>
+      <button class="btn btn-accent" id="saveSubjectBtn">Save Subject</button>
+    </div>
+  </div>
+</div>
+
+<!-- Topic Modal -->
+<div id="topicModal" class="modal-overlay hidden">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2 id="topicModalTitle">Add Topic</h2>
+      <button class="icon-btn modal-close" data-close="topicModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="topicId">
+      <input type="hidden" id="topicSubjectId">
+      <label>Topic Name <input type="text" id="topicName" required></label>
+      <label class="row-check"><input type="checkbox" id="topicCompleted"> Completed</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-small" id="deleteTopicBtn">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" data-close="topicModal">Cancel</button>
+      <button class="btn btn-accent" id="saveTopicBtn">Save Topic</button>
+    </div>
+  </div>
+</div>
+
+<!-- Exam Modal -->
+<div id="examModal" class="modal-overlay hidden">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2>Add Exam</h2>
+      <button class="icon-btn modal-close" data-close="examModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="examId">
+      <label>Subject <select id="examSubject" required></select></label>
+      <label>Exam Name <input type="text" id="examName" placeholder="e.g. Paper 1"></label>
+      <label>Date <input type="date" id="examDate" required></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger btn-small" id="deleteExamBtn">Delete</button>
+      <div class="spacer"></div>
+      <button class="btn" data-close="examModal">Cancel</button>
+      <button class="btn btn-accent" id="saveExamBtn">Save Exam</button>
+    </div>
+  </div>
+</div>
+
+<!-- Finish Session Modal (confidence / focus rating capture) -->
+<div id="finishModal" class="modal-overlay hidden">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2>Finish Session</h2>
+      <button class="icon-btn modal-close" data-close="finishModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Great work! Rate this session before it's saved to your log.</p>
+      <label>Confidence (1-5) <input type="range" id="finishConfidence" min="1" max="5" value="3"></label>
+      <label>Focus (1-5) <input type="range" id="finishFocus" min="1" max="5" value="3"></label>
+      <label class="full-width">Notes <textarea id="finishNotes" rows="2"></textarea></label>
+    </div>
+    <div class="modal-footer">
+      <div class="spacer"></div>
+      <button class="btn btn-accent" id="confirmFinishBtn">Save to Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Confirm Dialog -->
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal modal-small">
+    <div class="modal-header">
+      <h2 id="confirmTitle">Are you sure?</h2>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage"></p>
+    </div>
+    <div class="modal-footer">
+      <div class="spacer"></div>
+      <button class="btn" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
