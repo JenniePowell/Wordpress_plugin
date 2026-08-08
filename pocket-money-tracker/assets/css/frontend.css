@@ -1,0 +1,98 @@
+.pmt-tracker {
+	max-width: 100%;
+}
+
+.pmt-tabs--frontend {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	margin-bottom: 16px;
+}
+
+.pmt-tracker .pmt-tab {
+	padding: 8px 16px;
+	border-radius: 999px;
+	border: 2px solid #ffb400;
+	text-decoration: none;
+	color: #7a4b00;
+	font-weight: 600;
+	background: #fff8e8;
+}
+
+.pmt-tracker .pmt-tab--active {
+	background: #ffb400;
+	color: #402800;
+}
+
+.pmt-week-nav {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	margin: 16px 0;
+	font-weight: 600;
+	flex-wrap: wrap;
+}
+
+.pmt-week-nav__link {
+	text-decoration: none;
+}
+
+.pmt-week-nav__today {
+	margin-left: 8px;
+	font-size: 0.9em;
+}
+
+.pmt-grid {
+	border-collapse: collapse;
+	width: 100%;
+	margin-bottom: 12px;
+}
+
+.pmt-grid th,
+.pmt-grid td {
+	border: 1px solid #e2d9c8;
+	padding: 10px;
+	text-align: center;
+}
+
+.pmt-grid__task-col {
+	text-align: left;
+	font-weight: 600;
+	min-width: 160px;
+}
+
+.pmt-grid__day--today {
+	background: #fff3d6;
+}
+
+.pmt-check {
+	width: 26px;
+	height: 26px;
+	cursor: pointer;
+}
+
+.pmt-check:disabled {
+	cursor: not-allowed;
+	opacity: 0.4;
+}
+
+.pmt-total {
+	font-size: 1.25em;
+	margin-top: 8px;
+}
+
+.pmt-total__amount {
+	color: #1a7f37;
+}
+
+.pmt-empty {
+	font-style: italic;
+}
+
+@media ( max-width: 600px ) {
+	table.pmt-grid {
+		display: block;
+		overflow-x: auto;
+		white-space: nowrap;
+	}
+}
