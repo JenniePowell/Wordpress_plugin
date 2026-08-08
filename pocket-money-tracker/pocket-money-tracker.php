@@ -21,6 +21,7 @@ define( 'PMT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-activator.php';
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-db.php';
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-helpers.php';
+require_once PMT_PLUGIN_DIR . 'includes/class-pmt-task-presets.php';
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-grid.php';
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-admin.php';
 require_once PMT_PLUGIN_DIR . 'includes/class-pmt-ajax.php';
