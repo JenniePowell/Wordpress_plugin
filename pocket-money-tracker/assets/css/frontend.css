@@ -1,98 +1,369 @@
+/*
+ * Frontend checklist styling. Aimed at a wide age range (roughly 5-18):
+ * bright and rewarding without tipping into nursery/toddler visuals —
+ * confident colour, real typography, a progress bar instead of stickers.
+ */
+
 .pmt-tracker {
-	max-width: 100%;
+	--pmt-cream: #fff8f0;
+	--pmt-card: #ffffff;
+	--pmt-ink: #2b2a28;
+	--pmt-ink-soft: #726c63;
+	--pmt-coral: #ff6b4a;
+	--pmt-coral-dark: #e6553a;
+	--pmt-teal: #17a398;
+	--pmt-teal-dark: #128377;
+	--pmt-sun: #ffb100;
+	--pmt-border: #efe6d8;
+	--pmt-today: #fff1d6;
+	--pmt-locked: #f5f2ec;
+
+	max-width: 900px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	color: var( --pmt-ink );
 }
+
+.pmt-tracker a {
+	font-family: inherit;
+}
+
+/* --- Child tabs --- */
 
 .pmt-tabs--frontend {
 	display: flex;
-	gap: 8px;
+	gap: 10px;
 	flex-wrap: wrap;
-	margin-bottom: 16px;
+	margin-bottom: 20px;
 }
 
 .pmt-tracker .pmt-tab {
-	padding: 8px 16px;
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	padding: 7px 20px 7px 7px;
 	border-radius: 999px;
-	border: 2px solid #ffb400;
+	border: 2px solid var( --pmt-border );
+	background: var( --pmt-card );
 	text-decoration: none;
-	color: #7a4b00;
-	font-weight: 600;
-	background: #fff8e8;
+	font-weight: 700;
+	font-size: 15px;
+	color: var( --pmt-ink );
+	transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.pmt-tracker .pmt-tab::before {
+	content: attr( data-initial );
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background: var( --pmt-teal );
+	color: #fff;
+	font-size: 14px;
+	font-weight: 800;
+	flex-shrink: 0;
+}
+
+.pmt-tracker .pmt-tab:hover {
+	border-color: var( --pmt-teal );
+	transform: translateY( -1px );
 }
 
 .pmt-tracker .pmt-tab--active {
-	background: #ffb400;
-	color: #402800;
+	background: linear-gradient( 135deg, var( --pmt-coral ), var( --pmt-coral-dark ) );
+	border-color: var( --pmt-coral-dark );
+	color: #fff;
+	box-shadow: 0 4px 14px rgba( 230, 85, 58, 0.3 );
 }
+
+.pmt-tracker .pmt-tab--active::before {
+	background: rgba( 255, 255, 255, 0.25 );
+}
+
+/* --- Week navigation --- */
 
 .pmt-week-nav {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: 14px;
-	margin: 16px 0;
-	font-weight: 600;
+	margin: 4px 0 22px;
 	flex-wrap: wrap;
 }
 
 .pmt-week-nav__link {
+	display: inline-flex;
+	align-items: center;
+	padding: 8px 16px;
+	border-radius: 999px;
+	background: var( --pmt-card );
+	border: 2px solid var( --pmt-border );
+	color: var( --pmt-ink );
+	font-weight: 700;
+	font-size: 14px;
 	text-decoration: none;
+	transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.pmt-week-nav__link:hover {
+	border-color: var( --pmt-teal );
+	color: var( --pmt-teal-dark );
+}
+
+.pmt-week-nav__label {
+	font-weight: 800;
+	font-size: 16px;
+	color: var( --pmt-ink );
 }
 
 .pmt-week-nav__today {
-	margin-left: 8px;
-	font-size: 0.9em;
+	padding: 7px 16px;
+	border-radius: 999px;
+	background: var( --pmt-teal );
+	color: #fff;
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 13px;
+	transition: background 0.15s ease;
 }
 
-.pmt-grid {
+.pmt-week-nav__today:hover {
+	background: var( --pmt-teal-dark );
+	color: #fff;
+}
+
+/* --- Grid card --- */
+
+.pmt-grid-block + .pmt-grid-block {
+	margin-top: 32px;
+}
+
+.pmt-grid-wrap {
+	border-radius: 18px;
+	overflow: hidden;
+	border: 1px solid var( --pmt-border );
+	box-shadow: 0 2px 14px rgba( 43, 42, 40, 0.06 );
+}
+
+table.pmt-grid {
 	border-collapse: collapse;
 	width: 100%;
-	margin-bottom: 12px;
+	background: var( --pmt-card );
 }
 
 .pmt-grid th,
 .pmt-grid td {
-	border: 1px solid #e2d9c8;
-	padding: 10px;
+	padding: 14px 10px;
 	text-align: center;
+	border-bottom: 1px solid var( --pmt-border );
+}
+
+.pmt-grid thead th {
+	background: #fbf6ed;
+	font-weight: 700;
+	font-size: 12px;
+	color: var( --pmt-ink-soft );
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	border-bottom: 2px solid var( --pmt-border );
+}
+
+.pmt-grid__date {
+	display: block;
+	margin-top: 3px;
+	font-size: 18px;
+	font-weight: 800;
+	color: var( --pmt-ink );
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+.pmt-grid__today-badge {
+	display: inline-block;
+	margin-top: 5px;
+	padding: 2px 9px;
+	border-radius: 999px;
+	background: var( --pmt-coral );
+	color: #fff;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.pmt-grid__day--today {
+	background: var( --pmt-today ) !important;
+}
+
+thead .pmt-grid__day--today,
+thead .pmt-grid__day--today .pmt-grid__date {
+	color: var( --pmt-coral-dark );
 }
 
 .pmt-grid__task-col {
 	text-align: left;
-	font-weight: 600;
-	min-width: 160px;
+	font-weight: 700;
+	font-size: 15px;
+	color: var( --pmt-ink );
+	min-width: 170px;
 }
 
-.pmt-grid__day--today {
-	background: #fff3d6;
+.pmt-grid tbody tr:nth-child( even ) td:not( .pmt-grid__day--today ) {
+	background: #fcfaf5;
 }
+
+.pmt-grid tbody tr:hover td:not( .pmt-grid__day--today ) {
+	background: #f2faf8;
+}
+
+.pmt-grid tbody tr:hover td.pmt-grid__day--today {
+	background: #ffe7c4 !important;
+}
+
+.pmt-grid tbody tr:last-child td {
+	border-bottom: none;
+}
+
+/* --- Checkboxes: chunky, tactile, with a drawn tick --- */
 
 .pmt-check {
-	width: 26px;
-	height: 26px;
+	appearance: none;
+	-webkit-appearance: none;
+	width: 30px;
+	height: 30px;
+	border-radius: 9px;
+	border: 2.5px solid #d9cdba;
+	background: #fff;
+	position: relative;
 	cursor: pointer;
+	transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+	vertical-align: middle;
+}
+
+.pmt-check:hover:not( :disabled ) {
+	border-color: var( --pmt-teal );
+}
+
+.pmt-check:active:not( :disabled ) {
+	transform: scale( 0.9 );
+}
+
+.pmt-check:checked {
+	background: linear-gradient( 135deg, var( --pmt-teal ), var( --pmt-teal-dark ) );
+	border-color: var( --pmt-teal-dark );
+}
+
+.pmt-check::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 45%;
+	width: 8px;
+	height: 14px;
+	border-right: 3px solid #fff;
+	border-bottom: 3px solid #fff;
+	transform: translate( -50%, -60% ) rotate( 45deg ) scale( 0.4 );
+	opacity: 0;
+	transition: transform 0.18s cubic-bezier( 0.34, 1.56, 0.64, 1 ), opacity 0.12s ease;
+}
+
+.pmt-check:checked::after {
+	opacity: 1;
+	transform: translate( -50%, -60% ) rotate( 45deg ) scale( 1 );
 }
 
 .pmt-check:disabled {
 	cursor: not-allowed;
 	opacity: 0.4;
+	background: var( --pmt-locked );
 }
 
-.pmt-total {
-	font-size: 1.25em;
-	margin-top: 8px;
+.pmt-check:focus-visible {
+	outline: 3px solid var( --pmt-sun );
+	outline-offset: 2px;
+}
+
+/* --- Reward card / progress bar --- */
+
+.pmt-reward {
+	margin-top: 18px;
+	padding: 18px 22px;
+	border-radius: 18px;
+	background: linear-gradient( 135deg, #fff3e4, #ffead8 );
+	border: 1px solid var( --pmt-border );
+}
+
+.pmt-reward__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 12px;
+}
+
+.pmt-reward__label {
+	font-weight: 700;
+	font-size: 13px;
+	color: var( --pmt-ink-soft );
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.pmt-reward__amount {
+	font-size: 15px;
+	color: var( --pmt-ink-soft );
 }
 
 .pmt-total__amount {
-	color: #1a7f37;
+	font-size: 28px;
+	font-weight: 800;
+	color: var( --pmt-coral-dark );
+	margin-right: 4px;
+}
+
+.pmt-progress {
+	height: 14px;
+	border-radius: 999px;
+	background: rgba( 43, 42, 40, 0.08 );
+	overflow: hidden;
+}
+
+.pmt-progress__bar {
+	height: 100%;
+	border-radius: 999px;
+	background: linear-gradient( 90deg, var( --pmt-teal ), var( --pmt-coral ) );
+	transition: width 0.4s ease;
 }
 
 .pmt-empty {
-	font-style: italic;
+	padding: 32px;
+	text-align: center;
+	background: var( --pmt-card );
+	border-radius: 18px;
+	border: 1px dashed var( --pmt-border );
+	color: var( --pmt-ink-soft );
+	font-weight: 600;
+	font-style: normal;
 }
 
-@media ( max-width: 600px ) {
-	table.pmt-grid {
-		display: block;
+@media ( max-width: 640px ) {
+	.pmt-grid-wrap {
 		overflow-x: auto;
-		white-space: nowrap;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	table.pmt-grid {
+		min-width: 560px;
+	}
+
+	.pmt-reward {
+		padding: 16px;
+	}
+
+	.pmt-total__amount {
+		font-size: 24px;
 	}
 }

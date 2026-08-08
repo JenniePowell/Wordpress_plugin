@@ -4,21 +4,59 @@
 	padding: 8px 12px;
 }
 
+.pmt-grid-block {
+	margin: 8px 0 28px;
+	max-width: 900px;
+}
+
+.pmt-grid-wrap {
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
 .pmt-grid {
 	border-collapse: collapse;
-	margin: 8px 0 4px;
+	width: 100%;
+	background: #fff;
 }
 
 .pmt-grid th,
 .pmt-grid td {
-	border: 1px solid #dcdcde;
+	border-bottom: 1px solid #dcdcde;
 	padding: 6px 10px;
 	text-align: center;
+}
+
+.pmt-grid thead th {
+	background: #f6f7f7;
+}
+
+.pmt-grid tbody tr:last-child td {
+	border-bottom: none;
 }
 
 .pmt-grid__task-col {
 	text-align: left;
 	min-width: 180px;
+}
+
+.pmt-grid__date {
+	display: block;
+	font-weight: 600;
+}
+
+.pmt-grid__today-badge {
+	display: inline-block;
+	margin-left: 4px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #2271b1;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	vertical-align: middle;
 }
 
 .pmt-grid__day--today {
@@ -30,13 +68,45 @@
 	cursor: pointer;
 }
 
-.pmt-total {
-	font-size: 1.1em;
-	margin: 4px 0 24px;
+.pmt-reward {
+	margin: 10px 0 0;
+	padding: 10px 14px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.pmt-reward__row {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 8px;
+	font-size: 1.05em;
+}
+
+.pmt-reward__label {
+	font-weight: 600;
+	color: #50575e;
 }
 
 .pmt-total__amount {
 	color: #1a7f37;
+}
+
+.pmt-progress {
+	height: 8px;
+	border-radius: 999px;
+	background: #dcdcde;
+	overflow: hidden;
+	max-width: 300px;
+}
+
+.pmt-progress__bar {
+	height: 100%;
+	background: #2271b1;
+	transition: width 0.3s ease;
 }
 
 .pmt-week-nav {

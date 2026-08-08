@@ -84,8 +84,9 @@ class PMT_Shortcode {
 					),
 					$base_url
 				);
-				$class = ( (int) $c->id === (int) $child->id ) ? 'pmt-tab pmt-tab--active' : 'pmt-tab';
-				echo '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $url ) . '">' . esc_html( $c->name ) . '</a>';
+				$class   = ( (int) $c->id === (int) $child->id ) ? 'pmt-tab pmt-tab--active' : 'pmt-tab';
+				$initial = function_exists( 'mb_substr' ) ? mb_strtoupper( mb_substr( $c->name, 0, 1 ) ) : strtoupper( substr( $c->name, 0, 1 ) );
+				echo '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $url ) . '" data-initial="' . esc_attr( $initial ) . '">' . esc_html( $c->name ) . '</a>';
 			}
 			echo '</div>';
 		}

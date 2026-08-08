@@ -47,6 +47,8 @@ class PMT_Ajax {
 
 		$week_start = PMT_Helpers::week_start( $date );
 		$week_data  = PMT_Helpers::calculate_week( $child, $week_start );
+		$cap        = (int) $week_data['weekly_cap_pence'];
+		$percent    = $cap > 0 ? min( 100, (int) round( ( $week_data['total_earned'] / $cap ) * 100 ) ) : 0;
 
 		wp_send_json_success(
 			array(
@@ -54,6 +56,7 @@ class PMT_Ajax {
 				'total_earned_pence'     => $week_data['total_earned'],
 				'total_earned_formatted' => PMT_Helpers::format_money( $week_data['total_earned'] ),
 				'weekly_cap_formatted'   => PMT_Helpers::format_money( $week_data['weekly_cap_pence'] ),
+				'percent'                => $percent,
 			)
 		);
 	}
