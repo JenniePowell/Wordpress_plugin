@@ -98,6 +98,32 @@ class PMT_Admin {
 			$this->redirect( 'pmt-tasks', array( 'child_id' => $child_id ) );
 		}
 
+		if ( isset( $_POST['pmt_add_preset_tasks'] ) ) {
+			$child_id = absint( $_POST['child_id'] ?? 0 );
+			$selected = isset( $_POST['preset_tasks'] ) && is_array( $_POST['preset_tasks'] ) ? wp_unslash( $_POST['preset_tasks'] ) : array();
+
+			if ( $child_id ) {
+				$valid_presets       = PMT_Task_Presets::all();
+				$existing_names_lower = array_map( 'strtolower', wp_list_pluck( PMT_DB::get_tasks( $child_id, false ), 'name' ) );
+
+				foreach ( $selected as $raw ) {
+					$submitted = sanitize_text_field( $raw );
+					$match     = null;
+					foreach ( $valid_presets as $preset ) {
+						if ( 0 === strcasecmp( $preset, $submitted ) ) {
+							$match = $preset;
+							break;
+						}
+					}
+					if ( $match && ! in_array( strtolower( $match ), $existing_names_lower, true ) ) {
+						PMT_DB::insert_task( $child_id, $match );
+						$existing_names_lower[] = strtolower( $match );
+					}
+				}
+			}
+			$this->redirect( 'pmt-tasks', array( 'child_id' => $child_id ) );
+		}
+
 		if ( isset( $_POST['pmt_update_task'] ) ) {
 			$task_id  = absint( $_POST['task_id'] ?? 0 );
 			$child_id = absint( $_POST['child_id'] ?? 0 );
@@ -318,7 +344,37 @@ class PMT_Admin {
 			echo '</tbody></table>';
 			echo '<p class="description">' . esc_html__( 'Paused tasks don\'t count towards the weekly split and won\'t show on the checklist.', 'pocket-money-tracker' ) . '</p>';
 		} else {
-			echo '<p>' . esc_html__( 'No tasks yet — add the first one below.', 'pocket-money-tracker' ) . '</p>';
+			echo '<p>' . esc_html__( 'No tasks yet — add one from the suggestions below, or write your own.', 'pocket-money-tracker' ) . '</p>';
+		}
+
+		$existing_names_lower = array_map( 'strtolower', wp_list_pluck( $tasks, 'name' ) );
+		$available_presets    = array_filter(
+			PMT_Task_Presets::all(),
+			function ( $preset ) use ( $existing_names_lower ) {
+				return ! in_array( strtolower( $preset ), $existing_names_lower, true );
+			}
+		);
+
+		if ( ! empty( $available_presets ) ) {
+			echo '<h2>' . esc_html__( 'Suggested tasks', 'pocket-money-tracker' ) . '</h2>';
+			echo '<p class="description">' . sprintf(
+				/* translators: %s: child name */
+				esc_html__( 'Tick any you\'d like to add for %s, then add them in one go.', 'pocket-money-tracker' ),
+				esc_html( $child->name )
+			) . '</p>';
+			echo '<form method="post" class="pmt-form">';
+			$this->nonce_field();
+			echo '<input type="hidden" name="child_id" value="' . esc_attr( $child_id ) . '" />';
+			echo '<div class="pmt-preset-grid">';
+			foreach ( $available_presets as $preset ) {
+				$checkbox_id = 'pmt-preset-' . sanitize_title( $preset );
+				echo '<label class="pmt-preset-item" for="' . esc_attr( $checkbox_id ) . '">';
+				echo '<input type="checkbox" id="' . esc_attr( $checkbox_id ) . '" name="preset_tasks[]" value="' . esc_attr( $preset ) . '" /> ' . esc_html( $preset );
+				echo '</label>';
+			}
+			echo '</div>';
+			echo '<p><button type="submit" name="pmt_add_preset_tasks" value="1" class="button button-primary">' . esc_html__( 'Add selected tasks', 'pocket-money-tracker' ) . '</button></p>';
+			echo '</form>';
 		}
 
 		echo '<h2>' . esc_html__( 'Add a task', 'pocket-money-tracker' ) . '</h2>';

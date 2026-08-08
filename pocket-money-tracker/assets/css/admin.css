@@ -72,6 +72,20 @@
 	min-width: 240px;
 }
 
+.pmt-preset-grid {
+	display: grid;
+	grid-template-columns: repeat( auto-fill, minmax( 260px, 1fr ) );
+	gap: 6px 16px;
+	max-width: 900px;
+	margin: 8px 0;
+}
+
+.pmt-preset-item {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
 .pmt-table td,
 .pmt-table th {
 	vertical-align: middle;
