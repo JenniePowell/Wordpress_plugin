@@ -1,0 +1,78 @@
+.pmt-wrap .pmt-shortcode-hint {
+	background: #fff;
+	border-left: 4px solid #2271b1;
+	padding: 8px 12px;
+}
+
+.pmt-grid {
+	border-collapse: collapse;
+	margin: 8px 0 4px;
+}
+
+.pmt-grid th,
+.pmt-grid td {
+	border: 1px solid #dcdcde;
+	padding: 6px 10px;
+	text-align: center;
+}
+
+.pmt-grid__task-col {
+	text-align: left;
+	min-width: 180px;
+}
+
+.pmt-grid__day--today {
+	background: #fef8ee;
+}
+
+.pmt-check {
+	transform: scale(1.3);
+	cursor: pointer;
+}
+
+.pmt-total {
+	font-size: 1.1em;
+	margin: 4px 0 24px;
+}
+
+.pmt-total__amount {
+	color: #1a7f37;
+}
+
+.pmt-week-nav {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 12px 0;
+}
+
+.pmt-tabs {
+	margin: 12px 0;
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.pmt-tab {
+	padding: 6px 12px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	text-decoration: none;
+	background: #fff;
+}
+
+.pmt-tab--active {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+.pmt-form input[type="text"],
+.pmt-form input[type="number"] {
+	min-width: 240px;
+}
+
+.pmt-table td,
+.pmt-table th {
+	vertical-align: middle;
+}
