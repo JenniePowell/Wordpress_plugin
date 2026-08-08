@@ -36,22 +36,29 @@ class PMT_Grid {
 	}
 
 	public static function render_table( $week_data ) {
-		$tasks    = $week_data['tasks'];
-		$days     = $week_data['days'];
-		$child    = $week_data['child'];
-		$map      = $week_data['completions_map'];
-		$today    = current_time( 'Y-m-d' );
+		$tasks = $week_data['tasks'];
+		$days  = $week_data['days'];
+		$child = $week_data['child'];
+		$map   = $week_data['completions_map'];
+		$today = current_time( 'Y-m-d' );
 
 		if ( empty( $tasks ) ) {
 			echo '<p class="pmt-empty">' . esc_html__( 'No tasks set up for this child yet.', 'pocket-money-tracker' ) . '</p>';
 			return;
 		}
 
-		echo '<table class="pmt-grid" data-child-id="' . esc_attr( $child->id ) . '">';
+		echo '<div class="pmt-grid-block" data-child-id="' . esc_attr( $child->id ) . '">';
+
+		echo '<div class="pmt-grid-wrap"><table class="pmt-grid">';
 		echo '<thead><tr><th class="pmt-grid__task-col">' . esc_html__( 'Task', 'pocket-money-tracker' ) . '</th>';
 		foreach ( $days as $day ) {
-			$is_today = ( $day === $today ) ? ' pmt-grid__day--today' : '';
-			echo '<th class="pmt-grid__day' . esc_attr( $is_today ) . '">' . esc_html( date_i18n( 'D j', strtotime( $day ) ) ) . '</th>';
+			$is_today = ( $day === $today );
+			echo '<th class="pmt-grid__day' . ( $is_today ? ' pmt-grid__day--today' : '' ) . '">';
+			echo esc_html( date_i18n( 'D', strtotime( $day ) ) ) . '<span class="pmt-grid__date">' . esc_html( date_i18n( 'j', strtotime( $day ) ) ) . '</span>';
+			if ( $is_today ) {
+				echo '<span class="pmt-grid__today-badge">' . esc_html__( 'Today', 'pocket-money-tracker' ) . '</span>';
+			}
+			echo '</th>';
 		}
 		echo '</tr></thead><tbody>';
 
@@ -62,13 +69,20 @@ class PMT_Grid {
 				$completed = ! empty( $map[ $key ] );
 				$is_future = $day > $today;
 				$is_today  = ( $day === $today ) ? ' pmt-grid__day--today' : '';
+				$aria      = sprintf(
+					/* translators: 1: task name, 2: date */
+					__( '%1$s — %2$s', 'pocket-money-tracker' ),
+					$task->name,
+					date_i18n( 'l j F', strtotime( $day ) )
+				);
 
 				echo '<td class="pmt-grid__day' . esc_attr( $is_today ) . '">';
 				printf(
-					'<input type="checkbox" class="pmt-check" data-child-id="%1$d" data-task-id="%2$d" data-date="%3$s" %4$s %5$s />',
+					'<input type="checkbox" class="pmt-check" data-child-id="%1$d" data-task-id="%2$d" data-date="%3$s" aria-label="%4$s" %5$s %6$s />',
 					(int) $child->id,
 					(int) $task->id,
 					esc_attr( $day ),
+					esc_attr( $aria ),
 					checked( $completed, true, false ),
 					disabled( $is_future, true, false )
 				);
@@ -77,14 +91,31 @@ class PMT_Grid {
 			echo '</tr>';
 		}
 
-		echo '</tbody></table>';
+		echo '</tbody></table></div>';
 
+		self::render_reward( $week_data );
+
+		echo '</div>';
+	}
+
+	private static function render_reward( $week_data ) {
+		$cap     = (int) $week_data['weekly_cap_pence'];
+		$earned  = (int) $week_data['total_earned'];
+		$percent = $cap > 0 ? min( 100, (int) round( ( $earned / $cap ) * 100 ) ) : 0;
+
+		echo '<div class="pmt-reward">';
 		printf(
-			'<p class="pmt-total">%s <strong class="pmt-total__amount">%s</strong> %s <strong>%s</strong></p>',
-			esc_html__( 'Earned this week:', 'pocket-money-tracker' ),
-			esc_html( PMT_Helpers::format_money( $week_data['total_earned'] ) ),
+			'<div class="pmt-reward__row"><span class="pmt-reward__label">%1$s</span><span class="pmt-reward__amount"><strong class="pmt-total__amount">%2$s</strong> <span class="pmt-reward__cap">%3$s %4$s</span></span></div>',
+			esc_html__( 'Earned this week', 'pocket-money-tracker' ),
+			esc_html( PMT_Helpers::format_money( $earned ) ),
 			esc_html__( 'of', 'pocket-money-tracker' ),
-			esc_html( PMT_Helpers::format_money( $week_data['weekly_cap_pence'] ) )
+			esc_html( PMT_Helpers::format_money( $cap ) )
 		);
+		printf(
+			'<div class="pmt-progress" role="progressbar" aria-valuenow="%1$d" aria-valuemin="0" aria-valuemax="100" aria-label="%2$s"><div class="pmt-progress__bar" style="width:%1$d%%"></div></div>',
+			(int) $percent,
+			esc_attr__( 'Weekly pocket money progress', 'pocket-money-tracker' )
+		);
+		echo '</div>';
 	}
 }

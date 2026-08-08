@@ -2,10 +2,10 @@
 	'use strict';
 
 	function onToggle( checkbox ) {
-		var table = checkbox.closest( 'table.pmt-grid' );
-		var totalAmountEl = table && table.nextElementSibling && table.nextElementSibling.classList.contains( 'pmt-total' )
-			? table.nextElementSibling.querySelector( '.pmt-total__amount' )
-			: null;
+		var block = checkbox.closest( '.pmt-grid-block' );
+		var totalAmountEl = block ? block.querySelector( '.pmt-total__amount' ) : null;
+		var progressBarEl = block ? block.querySelector( '.pmt-progress__bar' ) : null;
+		var progressWrapEl = block ? block.querySelector( '.pmt-progress' ) : null;
 
 		var completed = checkbox.checked ? 1 : 0;
 		checkbox.disabled = true;
@@ -35,6 +35,12 @@
 				}
 				if ( totalAmountEl ) {
 					totalAmountEl.textContent = data.data.total_earned_formatted;
+				}
+				if ( progressBarEl && typeof data.data.percent !== 'undefined' ) {
+					progressBarEl.style.width = data.data.percent + '%';
+				}
+				if ( progressWrapEl && typeof data.data.percent !== 'undefined' ) {
+					progressWrapEl.setAttribute( 'aria-valuenow', data.data.percent );
 				}
 			} )
 			.catch( function () {
