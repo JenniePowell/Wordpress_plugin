@@ -1780,6 +1780,17 @@ function init() {
   updateTimerButtons();
   renderTimerDisplay();
   timerIntervalHandle = setInterval(timerTick, 1000);
+  registerServiceWorker();
+}
+
+// Registers the offline app-shell cache so the timetable, timer and log
+// keep working (and the home-screen icon keeps launching) without a
+// network connection. Safe to skip silently where unsupported.
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('service-worker.js').catch((err) => {
+    console.warn('Service worker registration failed:', err);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);
