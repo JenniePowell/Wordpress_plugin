@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Pocket Money Tracker
  * Description: A weekly, chore-based pocket money tracker. Kids tick off screen-free tasks each day to earn their pocket money, capped at a set amount per week per child.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Tree Duck Design
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // No direct access.
 }
 
-define( 'PMT_VERSION', '1.1.0' );
-define( 'PMT_DB_VERSION', '1.1' );
+define( 'PMT_VERSION', '1.2.0' );
+define( 'PMT_DB_VERSION', '1.2' );
 define( 'PMT_PLUGIN_FILE', __FILE__ );
 define( 'PMT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'PMT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

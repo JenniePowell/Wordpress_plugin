@@ -101,35 +101,44 @@ class PMT_DB {
 		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $task_id ) );
 	}
 
-	public static function insert_task( $child_id, $name, $frequency = 'daily' ) {
+	private static function normalize_value_percent( $value_percent ) {
+		$value_percent = (int) $value_percent;
+		return in_array( $value_percent, array( 5, 10, 15 ), true ) ? $value_percent : 5;
+	}
+
+	public static function insert_task( $child_id, $name, $frequency = 'daily', $value_percent = 5, $is_bonus = false ) {
 		global $wpdb;
 		$table = self::tasks_table();
 		$next_order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {$table} WHERE child_id = %d", $child_id ) );
 		$wpdb->insert(
 			$table,
 			array(
-				'child_id'   => $child_id,
-				'name'       => $name,
-				'frequency'  => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
-				'sort_order' => $next_order,
-				'active'     => 1,
+				'child_id'      => $child_id,
+				'name'          => $name,
+				'frequency'     => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
+				'value_percent' => self::normalize_value_percent( $value_percent ),
+				'is_bonus'      => $is_bonus ? 1 : 0,
+				'sort_order'    => $next_order,
+				'active'        => 1,
 			),
-			array( '%d', '%s', '%s', '%d', '%d' )
+			array( '%d', '%s', '%s', '%d', '%d', '%d', '%d' )
 		);
 		return (int) $wpdb->insert_id;
 	}
 
-	public static function update_task( $task_id, $name, $frequency ) {
+	public static function update_task( $task_id, $name, $frequency, $value_percent, $is_bonus ) {
 		global $wpdb;
 		$table = self::tasks_table();
 		return $wpdb->update(
 			$table,
 			array(
-				'name'      => $name,
-				'frequency' => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
+				'name'          => $name,
+				'frequency'     => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
+				'value_percent' => self::normalize_value_percent( $value_percent ),
+				'is_bonus'      => $is_bonus ? 1 : 0,
 			),
 			array( 'id' => $task_id ),
-			array( '%s', '%s' ),
+			array( '%s', '%s', '%d', '%d' ),
 			array( '%d' )
 		);
 	}

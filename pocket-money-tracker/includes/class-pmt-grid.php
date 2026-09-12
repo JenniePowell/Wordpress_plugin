@@ -64,11 +64,12 @@ class PMT_Grid {
 		echo '</tr></thead><tbody>';
 
 		foreach ( $tasks as $task ) {
-			$is_weekly = ( 'weekly' === $task->frequency );
+			$is_weekly  = ( 'weekly' === $task->frequency );
 			$freq_badge = $is_weekly ? '<span class="pmt-grid__freq-badge">' . esc_html__( 'Weekly', 'pocket-money-tracker' ) . '</span>' : '';
+			$bonus_badge = ! empty( $task->is_bonus ) ? '<span class="pmt-grid__bonus-badge">' . esc_html__( 'Bonus', 'pocket-money-tracker' ) . '</span>' : '';
 
 			echo '<tr' . ( $is_weekly ? ' class="pmt-grid__row--weekly"' : '' ) . '>';
-			echo '<td class="pmt-grid__task-col">' . esc_html( $task->name ) . $freq_badge . '</td>';
+			echo '<td class="pmt-grid__task-col">' . esc_html( $task->name ) . $freq_badge . $bonus_badge . '</td>';
 
 			if ( $is_weekly ) {
 				$key           = $task->id . '|' . $week_start;
