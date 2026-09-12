@@ -41,6 +41,35 @@
 	min-width: 180px;
 }
 
+.pmt-grid__freq-badge {
+	display: inline-block;
+	margin-left: 6px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #646970;
+	color: #fff;
+	font-size: 10px;
+	font-weight: 600;
+	text-transform: uppercase;
+	vertical-align: middle;
+}
+
+.pmt-grid__week-cell {
+	background: #f6f7f7;
+}
+
+.pmt-grid__week-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+}
+
+.pmt-freq-choice label {
+	margin-right: 12px;
+	font-weight: normal;
+}
+
 .pmt-grid__date {
 	display: block;
 	font-weight: 600;

@@ -59,38 +59,66 @@ class PMT_Helpers {
 	}
 
 	/**
-	 * Per-task pence value for a child, given their current active task count.
-	 * Uses floor() so num_tasks * 7 * per_task_pence never exceeds the weekly cap.
+	 * How many "shares" of the weekly pot one task is worth: a daily task can
+	 * be done on up to 7 days, a weekly task only once — so daily tasks are
+	 * worth 7x as much per completion as weekly ones, spread across the week.
 	 */
-	public static function per_task_pence( $weekly_amount_pence, $num_tasks ) {
-		if ( $num_tasks <= 0 ) {
+	public static function task_shares( $task ) {
+		return ( 'weekly' === $task->frequency ) ? 1 : self::DAYS_IN_WEEK;
+	}
+
+	/**
+	 * Pence value of a single share, given the total shares across a child's
+	 * active tasks. Uses floor() so total_shares * per_share_pence never
+	 * exceeds the weekly cap.
+	 */
+	public static function per_share_pence( $weekly_amount_pence, $total_shares ) {
+		if ( $total_shares <= 0 ) {
 			return 0;
 		}
-		return (int) floor( $weekly_amount_pence / ( $num_tasks * self::DAYS_IN_WEEK ) );
+		return (int) floor( $weekly_amount_pence / $total_shares );
+	}
+
+	/**
+	 * How many of a task's shares were actually earned this week: for a daily
+	 * task, one per completed day (0-7); for a weekly task, 0 or 1, keyed on
+	 * the week's Monday date since it isn't tied to any single day.
+	 */
+	public static function completed_units_for_task( $task, $days, $week_start, $completions_map ) {
+		if ( 'weekly' === $task->frequency ) {
+			$key = $task->id . '|' . $week_start;
+			return empty( $completions_map[ $key ] ) ? 0 : 1;
+		}
+		$count = 0;
+		foreach ( $days as $day ) {
+			$key = $task->id . '|' . $day;
+			if ( ! empty( $completions_map[ $key ] ) ) {
+				$count++;
+			}
+		}
+		return $count;
 	}
 
 	/**
 	 * Build the full data structure needed to render one child's week:
-	 * tasks, days, completion state per task/day, per-task value, and total earned.
+	 * tasks, days, completion state, per-share value, and total earned.
 	 */
 	public static function calculate_week( $child, $week_start ) {
-		$tasks = PMT_DB::get_tasks( $child->id, true );
-		$days  = self::week_days( $week_start );
+		$tasks    = PMT_DB::get_tasks( $child->id, true );
+		$days     = self::week_days( $week_start );
 		$week_end = self::week_end( $week_start );
 
-		$num_tasks      = count( $tasks );
-		$per_task_pence = self::per_task_pence( (int) $child->weekly_amount_pence, $num_tasks );
+		$total_shares = 0;
+		foreach ( $tasks as $task ) {
+			$total_shares += self::task_shares( $task );
+		}
+		$per_share_pence = self::per_share_pence( (int) $child->weekly_amount_pence, $total_shares );
 
 		$completions_map = PMT_DB::get_completions_map( $child->id, $week_start, $week_end );
 
-		$completed_count = 0;
+		$completed_units = 0;
 		foreach ( $tasks as $task ) {
-			foreach ( $days as $day ) {
-				$key = $task->id . '|' . $day;
-				if ( ! empty( $completions_map[ $key ] ) ) {
-					$completed_count++;
-				}
-			}
+			$completed_units += self::completed_units_for_task( $task, $days, $week_start, $completions_map );
 		}
 
 		return array(
@@ -100,8 +128,8 @@ class PMT_Helpers {
 			'week_start'       => $week_start,
 			'week_end'         => $week_end,
 			'completions_map'  => $completions_map,
-			'per_task_pence'   => $per_task_pence,
-			'total_earned'     => $per_task_pence * $completed_count,
+			'per_share_pence'  => $per_share_pence,
+			'total_earned'     => $per_share_pence * $completed_units,
 			'weekly_cap_pence' => (int) $child->weekly_amount_pence,
 		);
 	}

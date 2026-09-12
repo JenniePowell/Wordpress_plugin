@@ -7,9 +7,11 @@ Plugin code lives in [`pocket-money-tracker/`](pocket-money-tracker).
 ## How it works
 
 - **Children** each have their own weekly amount (e.g. £5 for a younger child, £16 for an older one with bigger tasks like washing the car).
-- **Tasks** are set per child (washing up, making the bed, tidying a room, saying something nice to a sibling, etc.) — the same list applies every day.
-- A task's value is `weekly amount ÷ (number of active tasks × 7 days)`, rounded down, so the week's total can never exceed the cap.
-- Ticking a task off for a day credits that amount; leaving it unticked earns nothing for that task/day.
+- **Tasks** are set per child (washing up, making the bed, tidying a room, saying something nice to a sibling, etc.) and each one is either:
+  - **Daily** — shown every day of the week, tick it off up to 7 times.
+  - **Weekly** — shown once as a single "This week" checkbox (good for things like mowing the lawn or a deep clean of a room that only need doing once).
+- The weekly amount is split into shares: a daily task is worth 7 shares (one per possible day), a weekly task is worth 1 share. Each share's value is `weekly amount ÷ total shares`, rounded down, so the week's total can never exceed the cap regardless of the daily/weekly mix.
+- Ticking a task off credits its share; leaving it unticked earns nothing for that task.
 
 ## Setup
 
