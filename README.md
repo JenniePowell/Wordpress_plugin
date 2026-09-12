@@ -10,12 +10,12 @@ Plugin code lives in [`pocket-money-tracker/`](pocket-money-tracker).
 - **Tasks** are set per child and each one is either:
   - **Daily** — shown every day of the week, tick it off up to 7 times.
   - **Weekly** — shown once as a single "This week" checkbox (good for things like mowing the lawn or a deep clean of a room that only need doing once).
-- Each task is also worth a fixed **percentage of the weekly amount**, picked per task:
+- Each task also has a **Worth** tier, picked per task:
   - **5%** — small, everyday-expected habits (making the bed, putting laundry away, shoes and coats away).
   - **10%** — a bit more effort (laying the table, feeding a pet, reading for 20 minutes).
   - **15%** — bigger jobs, usually weekly (tidying/dusting a room, washing the car).
   - Any task can also be flagged as **Bonus** — an optional extra, useful for topping up money missed from a skipped day.
-- Ticking a task credits its fixed percentage of the weekly amount; the running total is always capped at the weekly amount itself, however many tasks add up — that cap is what gives bonus tasks room to make up for something missed, rather than just stacking on top indefinitely.
+- These tiers are *relative*, not fixed slices of money: completing every non-bonus task in a week always adds up to exactly the child's full weekly amount, whatever the mix of tasks or how many there are — add, remove or reweight tasks and the split just reshapes itself around the new set, it never drifts above or below 100%. Bonus tasks sit outside that split as genuine extras on top, which is what lets them make up for something missed elsewhere in the week — the running total is still capped at the weekly amount either way.
 
 ## Setup
 
