@@ -302,6 +302,18 @@ class PMT_Admin {
 		) . '</p>';
 
 		if ( ! empty( $tasks ) ) {
+			$active_tasks = array_filter( $tasks, function ( $t ) { return (int) $t->active === 1; } );
+			list( $core_active_tasks, ) = PMT_Helpers::split_core_and_bonus_tasks( $active_tasks );
+			$core_active_ids = wp_list_pluck( $core_active_tasks, 'id' );
+			$total_active_shares = 0;
+			foreach ( $core_active_tasks as $t ) {
+				$total_active_shares += PMT_Helpers::task_shares( $t );
+			}
+			// Bonus tasks aren't part of the normalised pool, so their Value
+			// falls back to a simple per-share estimate rather than the exact
+			// figure core tasks get.
+			$per_share_pence = PMT_Helpers::per_share_pence( (int) $child->weekly_amount_pence, $total_active_shares );
+
 			// As on the Children screen: empty forms (hidden fields only) live
 			// outside the table; visible fields/buttons link back via `form=`
 			// so no <form> is ever nested directly inside a <tr>.
@@ -347,8 +359,16 @@ class PMT_Admin {
 
 				$value_label = '—';
 				if ( $task->active ) {
-					$task_value  = PMT_Helpers::task_value_pence( $task, (int) $child->weekly_amount_pence );
-					$value_label = esc_html( PMT_Helpers::format_money( $task_value ) ) . ' ' . ( $is_weekly ? esc_html__( '/week', 'pocket-money-tracker' ) : esc_html__( '/day', 'pocket-money-tracker' ) );
+					if ( in_array( $task->id, $core_active_ids, true ) ) {
+						$task_value = PMT_Helpers::task_full_completion_pence( $task, $total_active_shares, (int) $child->weekly_amount_pence );
+					} else {
+						$task_value = $per_share_pence * PMT_Helpers::task_shares( $task );
+					}
+					$value_label = sprintf(
+						/* translators: %s: formatted money amount */
+						esc_html__( 'up to %s this week', 'pocket-money-tracker' ),
+						esc_html( PMT_Helpers::format_money( $task_value ) )
+					);
 				}
 
 				echo '<tr>';
@@ -373,7 +393,7 @@ class PMT_Admin {
 				echo '</tr>';
 			}
 			echo '</tbody></table>';
-			echo '<p class="description">' . esc_html__( 'Paused tasks don\'t earn anything and won\'t show on the checklist. Bonus tasks are optional extras — a good way to make up money missed from a skipped day, since the weekly total is always capped at the weekly amount either way.', 'pocket-money-tracker' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'Values are worked out from Worth relative to every other active task, so completing everything (excluding bonus tasks) always adds up to the full weekly amount, however many tasks there are — adding, removing or pausing a task reshapes the Value column for the rest. Paused tasks don\'t earn anything and won\'t show on the checklist. Bonus tasks sit outside that split as optional extras — a good way to make up money missed from a skipped day, since the weekly total is still always capped at the weekly amount.', 'pocket-money-tracker' ) . '</p>';
 		} else {
 			echo '<p>' . esc_html__( 'No tasks yet — add one from the suggestions below, or write your own.', 'pocket-money-tracker' ) . '</p>';
 		}
