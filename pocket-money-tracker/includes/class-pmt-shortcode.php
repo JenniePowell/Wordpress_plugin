@@ -12,11 +12,16 @@ class PMT_Shortcode {
 	public function __construct() {
 		add_shortcode( 'pocket_money_tracker', array( $this, 'render' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_assets' ) );
+		add_action( 'wp_head', array( $this, 'maybe_output_home_screen_tags' ) );
+	}
+
+	private function current_page_has_shortcode() {
+		global $post;
+		return ( $post instanceof WP_Post ) && has_shortcode( $post->post_content, 'pocket_money_tracker' );
 	}
 
 	public function maybe_enqueue_assets() {
-		global $post;
-		if ( ! ( $post instanceof WP_Post ) || ! has_shortcode( $post->post_content, 'pocket_money_tracker' ) ) {
+		if ( ! $this->current_page_has_shortcode() ) {
 			return;
 		}
 		wp_enqueue_style( 'pmt-frontend', PMT_PLUGIN_URL . 'assets/css/frontend.css', array(), PMT_VERSION );
@@ -29,6 +34,23 @@ class PMT_Shortcode {
 				'nonce'   => wp_create_nonce( PMT_Ajax::NONCE_ACTION ),
 			)
 		);
+	}
+
+	/**
+	 * Makes "Add to Home Screen" on iPad/iPhone produce a proper full-screen
+	 * app: its own icon, no Safari chrome, and a short title under the icon.
+	 */
+	public function maybe_output_home_screen_tags() {
+		if ( ! $this->current_page_has_shortcode() ) {
+			return;
+		}
+		$icon_url = PMT_PLUGIN_URL . 'assets/img/icon-180.png';
+		echo '<meta name="mobile-web-app-capable" content="yes">' . "\n";
+		echo '<meta name="apple-mobile-web-app-capable" content="yes">' . "\n";
+		echo '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">' . "\n";
+		echo '<meta name="apple-mobile-web-app-title" content="' . esc_attr__( 'Pocket Money', 'pocket-money-tracker' ) . '">' . "\n";
+		echo '<meta name="theme-color" content="#ff6b4a">' . "\n";
+		echo '<link rel="apple-touch-icon" href="' . esc_url( $icon_url ) . '">' . "\n";
 	}
 
 	public function render( $atts ) {

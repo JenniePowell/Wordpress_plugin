@@ -20,6 +20,14 @@ Plugin code lives in [`pocket-money-tracker/`](pocket-money-tracker).
 5. Add the `[pocket_money_tracker]` shortcode to a page — this is the kid-facing checklist, no login required. Use `[pocket_money_tracker child="3"]` to pin the shortcode to one specific child's ID (shown in the Children/Tasks admin screens).
 6. Parents can also view and tick on the **Pocket Money → Overview** admin page, with a week-by-week view for every child.
 
+## Using it like an app (iPad/iPhone)
+
+The shortcode page has its own icon and "Add to Home Screen" support built in — no App Store needed:
+
+1. Open the page with the `[pocket_money_tracker]` shortcode in **Safari** on the iPad (use the plain page URL, not a link with `?pmt_child=` / `?pmt_week=` already in it, so the saved shortcut isn't pinned to one child or week).
+2. Tap the Share icon, then **Add to Home Screen**.
+3. It now opens full-screen with its own icon and no Safari address bar — just like an app.
+
 ## Notes
 
 - The frontend checklist page is open to anyone who can reach its URL (no WordPress login is required, since kids don't have their own accounts). Keep the page unlisted/private if that matters for your setup.
