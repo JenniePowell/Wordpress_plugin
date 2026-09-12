@@ -101,7 +101,7 @@ class PMT_DB {
 		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $task_id ) );
 	}
 
-	public static function insert_task( $child_id, $name ) {
+	public static function insert_task( $child_id, $name, $frequency = 'daily' ) {
 		global $wpdb;
 		$table = self::tasks_table();
 		$next_order = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(MAX(sort_order), 0) + 1 FROM {$table} WHERE child_id = %d", $child_id ) );
@@ -110,18 +110,28 @@ class PMT_DB {
 			array(
 				'child_id'   => $child_id,
 				'name'       => $name,
+				'frequency'  => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
 				'sort_order' => $next_order,
 				'active'     => 1,
 			),
-			array( '%d', '%s', '%d', '%d' )
+			array( '%d', '%s', '%s', '%d', '%d' )
 		);
 		return (int) $wpdb->insert_id;
 	}
 
-	public static function update_task_name( $task_id, $name ) {
+	public static function update_task( $task_id, $name, $frequency ) {
 		global $wpdb;
 		$table = self::tasks_table();
-		return $wpdb->update( $table, array( 'name' => $name ), array( 'id' => $task_id ), array( '%s' ), array( '%d' ) );
+		return $wpdb->update(
+			$table,
+			array(
+				'name'      => $name,
+				'frequency' => ( 'weekly' === $frequency ) ? 'weekly' : 'daily',
+			),
+			array( 'id' => $task_id ),
+			array( '%s', '%s' ),
+			array( '%d' )
+		);
 	}
 
 	public static function set_task_active( $task_id, $active ) {

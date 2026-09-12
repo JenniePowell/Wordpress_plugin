@@ -36,11 +36,12 @@ class PMT_Grid {
 	}
 
 	public static function render_table( $week_data ) {
-		$tasks = $week_data['tasks'];
-		$days  = $week_data['days'];
-		$child = $week_data['child'];
-		$map   = $week_data['completions_map'];
-		$today = current_time( 'Y-m-d' );
+		$tasks      = $week_data['tasks'];
+		$days       = $week_data['days'];
+		$child      = $week_data['child'];
+		$map        = $week_data['completions_map'];
+		$week_start = $week_data['week_start'];
+		$today      = current_time( 'Y-m-d' );
 
 		if ( empty( $tasks ) ) {
 			echo '<p class="pmt-empty">' . esc_html__( 'No tasks set up for this child yet.', 'pocket-money-tracker' ) . '</p>';
@@ -63,30 +64,61 @@ class PMT_Grid {
 		echo '</tr></thead><tbody>';
 
 		foreach ( $tasks as $task ) {
-			echo '<tr><td class="pmt-grid__task-col">' . esc_html( $task->name ) . '</td>';
-			foreach ( $days as $day ) {
-				$key       = $task->id . '|' . $day;
-				$completed = ! empty( $map[ $key ] );
-				$is_future = $day > $today;
-				$is_today  = ( $day === $today ) ? ' pmt-grid__day--today' : '';
-				$aria      = sprintf(
-					/* translators: 1: task name, 2: date */
-					__( '%1$s — %2$s', 'pocket-money-tracker' ),
-					$task->name,
-					date_i18n( 'l j F', strtotime( $day ) )
+			$is_weekly = ( 'weekly' === $task->frequency );
+			$freq_badge = $is_weekly ? '<span class="pmt-grid__freq-badge">' . esc_html__( 'Weekly', 'pocket-money-tracker' ) . '</span>' : '';
+
+			echo '<tr' . ( $is_weekly ? ' class="pmt-grid__row--weekly"' : '' ) . '>';
+			echo '<td class="pmt-grid__task-col">' . esc_html( $task->name ) . $freq_badge . '</td>';
+
+			if ( $is_weekly ) {
+				$key           = $task->id . '|' . $week_start;
+				$completed     = ! empty( $map[ $key ] );
+				$is_future_wk  = $week_start > $today;
+				$aria          = sprintf(
+					/* translators: %s: task name */
+					__( '%s — this week', 'pocket-money-tracker' ),
+					$task->name
 				);
 
-				echo '<td class="pmt-grid__day' . esc_attr( $is_today ) . '">';
+				echo '<td class="pmt-grid__week-cell" colspan="' . count( $days ) . '">';
+				echo '<label class="pmt-grid__week-toggle">';
 				printf(
 					'<input type="checkbox" class="pmt-check" data-child-id="%1$d" data-task-id="%2$d" data-date="%3$s" aria-label="%4$s" %5$s %6$s />',
 					(int) $child->id,
 					(int) $task->id,
-					esc_attr( $day ),
+					esc_attr( $week_start ),
 					esc_attr( $aria ),
 					checked( $completed, true, false ),
-					disabled( $is_future, true, false )
+					disabled( $is_future_wk, true, false )
 				);
+				echo '<span>' . esc_html__( 'This week', 'pocket-money-tracker' ) . '</span>';
+				echo '</label>';
 				echo '</td>';
+			} else {
+				foreach ( $days as $day ) {
+					$key       = $task->id . '|' . $day;
+					$completed = ! empty( $map[ $key ] );
+					$is_future = $day > $today;
+					$is_today  = ( $day === $today ) ? ' pmt-grid__day--today' : '';
+					$aria      = sprintf(
+						/* translators: 1: task name, 2: date */
+						__( '%1$s — %2$s', 'pocket-money-tracker' ),
+						$task->name,
+						date_i18n( 'l j F', strtotime( $day ) )
+					);
+
+					echo '<td class="pmt-grid__day' . esc_attr( $is_today ) . '">';
+					printf(
+						'<input type="checkbox" class="pmt-check" data-child-id="%1$d" data-task-id="%2$d" data-date="%3$s" aria-label="%4$s" %5$s %6$s />',
+						(int) $child->id,
+						(int) $task->id,
+						esc_attr( $day ),
+						esc_attr( $aria ),
+						checked( $completed, true, false ),
+						disabled( $is_future, true, false )
+					);
+					echo '</td>';
+				}
 			}
 			echo '</tr>';
 		}

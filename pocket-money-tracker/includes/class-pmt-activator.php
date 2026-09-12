@@ -29,6 +29,7 @@ class PMT_Activator {
 			id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 			child_id bigint(20) unsigned NOT NULL,
 			name varchar(150) NOT NULL,
+			frequency varchar(10) NOT NULL DEFAULT 'daily',
 			sort_order int(10) unsigned NOT NULL DEFAULT 0,
 			active tinyint(1) NOT NULL DEFAULT 1,
 			created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -50,6 +51,18 @@ class PMT_Activator {
 
 		dbDelta( $sql );
 
-		add_option( 'pmt_db_version', PMT_VERSION );
+		update_option( 'pmt_db_version', PMT_DB_VERSION );
+	}
+
+	/**
+	 * Re-runs dbDelta (safe/idempotent — it only adds what's missing) when an
+	 * already-active install's schema is behind, e.g. after a plugin update
+	 * that added a column. dbDelta itself requires wp-admin/includes/upgrade.php,
+	 * which activate() already loads.
+	 */
+	public static function maybe_upgrade() {
+		if ( get_option( 'pmt_db_version' ) !== PMT_DB_VERSION ) {
+			self::activate();
+		}
 	}
 }

@@ -90,17 +90,19 @@ class PMT_Admin {
 		}
 
 		if ( isset( $_POST['pmt_add_task'] ) ) {
-			$child_id = absint( $_POST['child_id'] ?? 0 );
-			$name     = sanitize_text_field( wp_unslash( $_POST['task_name'] ?? '' ) );
+			$child_id  = absint( $_POST['child_id'] ?? 0 );
+			$name      = sanitize_text_field( wp_unslash( $_POST['task_name'] ?? '' ) );
+			$frequency = $this->sanitize_frequency( $_POST['frequency'] ?? '' );
 			if ( $child_id && '' !== $name ) {
-				PMT_DB::insert_task( $child_id, $name );
+				PMT_DB::insert_task( $child_id, $name, $frequency );
 			}
 			$this->redirect( 'pmt-tasks', array( 'child_id' => $child_id ) );
 		}
 
 		if ( isset( $_POST['pmt_add_preset_tasks'] ) ) {
-			$child_id = absint( $_POST['child_id'] ?? 0 );
-			$selected = isset( $_POST['preset_tasks'] ) && is_array( $_POST['preset_tasks'] ) ? wp_unslash( $_POST['preset_tasks'] ) : array();
+			$child_id  = absint( $_POST['child_id'] ?? 0 );
+			$frequency = $this->sanitize_frequency( $_POST['preset_frequency'] ?? '' );
+			$selected  = isset( $_POST['preset_tasks'] ) && is_array( $_POST['preset_tasks'] ) ? wp_unslash( $_POST['preset_tasks'] ) : array();
 
 			if ( $child_id ) {
 				$valid_presets       = PMT_Task_Presets::all();
@@ -116,7 +118,7 @@ class PMT_Admin {
 						}
 					}
 					if ( $match && ! in_array( strtolower( $match ), $existing_names_lower, true ) ) {
-						PMT_DB::insert_task( $child_id, $match );
+						PMT_DB::insert_task( $child_id, $match, $frequency );
 						$existing_names_lower[] = strtolower( $match );
 					}
 				}
@@ -125,11 +127,12 @@ class PMT_Admin {
 		}
 
 		if ( isset( $_POST['pmt_update_task'] ) ) {
-			$task_id  = absint( $_POST['task_id'] ?? 0 );
-			$child_id = absint( $_POST['child_id'] ?? 0 );
-			$name     = sanitize_text_field( wp_unslash( $_POST['task_name'] ?? '' ) );
+			$task_id   = absint( $_POST['task_id'] ?? 0 );
+			$child_id  = absint( $_POST['child_id'] ?? 0 );
+			$name      = sanitize_text_field( wp_unslash( $_POST['task_name'] ?? '' ) );
+			$frequency = $this->sanitize_frequency( $_POST['frequency'] ?? '' );
 			if ( $task_id && '' !== $name ) {
-				PMT_DB::update_task_name( $task_id, $name );
+				PMT_DB::update_task( $task_id, $name, $frequency );
 			}
 			$this->redirect( 'pmt-tasks', array( 'child_id' => $child_id ) );
 		}
@@ -162,6 +165,10 @@ class PMT_Admin {
 
 	private function nonce_field() {
 		wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD );
+	}
+
+	private function sanitize_frequency( $raw ) {
+		return ( 'weekly' === $raw ) ? 'weekly' : 'daily';
 	}
 
 	/* ---------------- Pages ---------------- */
@@ -287,9 +294,13 @@ class PMT_Admin {
 		) . '</p>';
 
 		if ( ! empty( $tasks ) ) {
-			$per_task = PMT_Helpers::per_task_pence( (int) $child->weekly_amount_pence, count( array_filter( $tasks, function ( $t ) {
-				return (int) $t->active === 1;
-			} ) ) );
+			$total_shares = 0;
+			foreach ( $tasks as $t ) {
+				if ( (int) $t->active === 1 ) {
+					$total_shares += PMT_Helpers::task_shares( $t );
+				}
+			}
+			$per_share = PMT_Helpers::per_share_pence( (int) $child->weekly_amount_pence, $total_shares );
 
 			// As on the Children screen: empty forms (hidden fields only) live
 			// outside the table; visible fields/buttons link back via `form=`
@@ -321,19 +332,30 @@ class PMT_Admin {
 
 			echo '<table class="widefat pmt-table"><thead><tr>';
 			echo '<th>' . esc_html__( 'Task', 'pocket-money-tracker' ) . '</th>';
+			echo '<th>' . esc_html__( 'Frequency', 'pocket-money-tracker' ) . '</th>';
 			echo '<th>' . esc_html__( 'Active', 'pocket-money-tracker' ) . '</th>';
-			echo '<th>' . esc_html__( 'Value/day', 'pocket-money-tracker' ) . '</th>';
+			echo '<th>' . esc_html__( 'Value', 'pocket-money-tracker' ) . '</th>';
 			echo '<th></th></tr></thead><tbody>';
 
 			foreach ( $tasks as $task ) {
 				$update_form_id = 'pmt-task-update-' . (int) $task->id;
 				$toggle_form_id = 'pmt-task-toggle-' . (int) $task->id;
 				$delete_form_id = 'pmt-task-delete-' . (int) $task->id;
+				$is_weekly      = ( 'weekly' === $task->frequency );
+
+				$value_label = '—';
+				if ( $task->active ) {
+					$value_label = esc_html( PMT_Helpers::format_money( $per_share ) ) . ' ' . ( $is_weekly ? esc_html__( '/week', 'pocket-money-tracker' ) : esc_html__( '/day', 'pocket-money-tracker' ) );
+				}
 
 				echo '<tr>';
 				echo '<td><input type="text" name="task_name" form="' . esc_attr( $update_form_id ) . '" value="' . esc_attr( $task->name ) . '" required /></td>';
+				echo '<td><select name="frequency" form="' . esc_attr( $update_form_id ) . '">';
+				echo '<option value="daily"' . selected( ! $is_weekly, true, false ) . '>' . esc_html__( 'Daily', 'pocket-money-tracker' ) . '</option>';
+				echo '<option value="weekly"' . selected( $is_weekly, true, false ) . '>' . esc_html__( 'Weekly', 'pocket-money-tracker' ) . '</option>';
+				echo '</select></td>';
 				echo '<td>' . ( $task->active ? esc_html__( 'Yes', 'pocket-money-tracker' ) : esc_html__( 'No', 'pocket-money-tracker' ) ) . '</td>';
-				echo '<td>' . ( $task->active ? esc_html( PMT_Helpers::format_money( $per_task ) ) : '—' ) . '</td>';
+				echo '<td>' . $value_label . '</td>';
 				echo '<td>';
 				echo '<button type="submit" name="pmt_update_task" value="1" form="' . esc_attr( $update_form_id ) . '" class="button">' . esc_html__( 'Save', 'pocket-money-tracker' ) . '</button> ';
 				echo '<button type="submit" name="pmt_toggle_task_active" value="1" form="' . esc_attr( $toggle_form_id ) . '" class="button">' . ( $task->active ? esc_html__( 'Pause', 'pocket-money-tracker' ) : esc_html__( 'Resume', 'pocket-money-tracker' ) ) . '</button> ';
@@ -373,6 +395,10 @@ class PMT_Admin {
 				echo '</label>';
 			}
 			echo '</div>';
+			echo '<p class="pmt-freq-choice">' . esc_html__( 'Add these as:', 'pocket-money-tracker' ) . ' ';
+			echo '<label><input type="radio" name="preset_frequency" value="daily" checked="checked" /> ' . esc_html__( 'Daily', 'pocket-money-tracker' ) . '</label> ';
+			echo '<label><input type="radio" name="preset_frequency" value="weekly" /> ' . esc_html__( 'Weekly', 'pocket-money-tracker' ) . '</label>';
+			echo '</p>';
 			echo '<p><button type="submit" name="pmt_add_preset_tasks" value="1" class="button button-primary">' . esc_html__( 'Add selected tasks', 'pocket-money-tracker' ) . '</button></p>';
 			echo '</form>';
 		}
@@ -382,6 +408,10 @@ class PMT_Admin {
 		$this->nonce_field();
 		echo '<input type="hidden" name="child_id" value="' . esc_attr( $child_id ) . '" />';
 		echo '<p><label>' . esc_html__( 'Task name', 'pocket-money-tracker' ) . '<br /><input type="text" name="task_name" placeholder="' . esc_attr__( 'e.g. Wash up after dinner', 'pocket-money-tracker' ) . '" required /></label></p>';
+		echo '<p><label>' . esc_html__( 'Frequency', 'pocket-money-tracker' ) . '<br /><select name="frequency">';
+		echo '<option value="daily">' . esc_html__( 'Daily', 'pocket-money-tracker' ) . '</option>';
+		echo '<option value="weekly">' . esc_html__( 'Weekly', 'pocket-money-tracker' ) . '</option>';
+		echo '</select></label></p>';
 		echo '<p><button type="submit" name="pmt_add_task" value="1" class="button button-primary">' . esc_html__( 'Add task', 'pocket-money-tracker' ) . '</button></p>';
 		echo '</form>';
 
